@@ -1,6 +1,7 @@
-const { src, dest, watch } = require("gulp");
+const { src, dest, watch, parallel } = require("gulp");
 const scss = require("gulp-sass"),
-	prefix = require("gulp-autoprefixer");
+	prefix = require("gulp-autoprefixer"),
+	sync = require("browser-sync").create();
 
 function convertStyles() {
 	return src('app/scss/style.scss')
@@ -12,6 +13,15 @@ function convertStyles() {
     .pipe(prefix())
 	.pipe(dest('dist/css'));
 };
+
+function browserSync() {
+	sync.init({
+		server: {
+			baseDir: "app",
+			open: "local"
+		}
+	});
+}
 
 function watchFiles() {
     watch('app/scss/**/*.scss', convertStyles);
@@ -25,3 +35,5 @@ function watchFiles() {
 
 exports.convertStyles = convertStyles;
 exports.watchFiles = watchFiles;
+exports.browserSync = browserSync;
+exports.default = parallel(convertStyles, watchFiles, browserSync);
