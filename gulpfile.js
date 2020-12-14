@@ -2,8 +2,41 @@ const { src, dest, watch, parallel, series } = require("gulp");
 const scss = require("gulp-sass"),
 	prefix = require("gulp-autoprefixer"),
 	sync = require("browser-sync").create(),
-	imagemin = require("gulp-imagemin");
+	imagemin = require("gulp-imagemin"),
+
+	fs = require("fs");
+
 	
+// Создание файлов
+function createFiles() {
+    createFolders();
+    setTimeout(() => {
+        
+        fs.writeFile("newfolder/index.html", "!", function (err) {
+            if(err) {
+                throw err;
+            }
+            console.log("File created");
+        });
+        fs.writeFile("newfolder//scss/style.scss", "", function (err) {
+            if(err) {
+                throw err;
+            }
+            console.log("File created");
+        });
+    }, 500);
+};
+
+// Создание папок 
+function createFolders() {
+    return src("*.*", {read: false})
+    .pipe(dest("./newfolder/scss/"))
+    .pipe(dest("./newfolder/js/"))
+    .pipe(dest("./newfolder/img/"))
+    .pipe(dest("./newfolder/fonts"))
+}
+
+
 function convertStyles() {
 	return src('app/scss/style.scss')
 	.pipe(scss(
@@ -44,6 +77,7 @@ exports.convertStyles = convertStyles;
 exports.watchFiles = watchFiles;
 exports.browserSync = browserSync;
 exports.imagesCompressed = imagesCompressed;
+exports.struct = createFiles;
 
 exports.default = parallel(convertStyles, browserSync, watchFiles);
 
@@ -74,6 +108,8 @@ exports.moveJs = moveJs;
 exports.moveImgs = moveImgs;
 exports.build = series(moveHtml, moveCss, moveJs, moveImgs)
 
+
+// создаем папки и файлы командой gulp struct
 // для запуска convertStyles, watchFiles, browserSync пишем gulp 
 // для перемещения файлов набираем gulp build
 // перемещение картинок не нужно, так как конвертирую сразу в папку (нужно переделать)
