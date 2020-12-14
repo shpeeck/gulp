@@ -3,6 +3,8 @@ const scss = require("gulp-sass"),
 	prefix = require("gulp-autoprefixer"),
 	sync = require("browser-sync").create(),
 	imagemin = require("gulp-imagemin"),
+	ttf2woff = require("gulp-ttf2woff"),
+    ttf2woff2 = require("gulp-ttf2woff2"),
 
 	fs = require("fs");
 
@@ -69,7 +71,7 @@ function watchFiles() {
     watch('app/css/*.css').on("change", sync.reload);
     watch('app/js/*.js').on("change", sync.reload);
     watch('app/img', imagesCompressed);
-    // watch('app/fonts/**.ttf', series(convertFonts, fontsStyle));
+    watch('app/fonts/**.ttf', series(convertFonts, fontsStyle));
 }
 
 
@@ -79,7 +81,7 @@ exports.browserSync = browserSync;
 exports.imagesCompressed = imagesCompressed;
 exports.struct = createFiles;
 
-exports.default = parallel(convertStyles, browserSync, watchFiles);
+exports.default = parallel(convertStyles, browserSync, watchFiles, series(convertFonts, fontsStyle));
 
 // build 
 function moveHtml() {
@@ -108,6 +110,51 @@ exports.moveJs = moveJs;
 exports.moveImgs = moveImgs;
 exports.build = series(moveHtml, moveCss, moveJs, moveImgs)
 
+// Шрифты 
+function convertFonts() {
+    src(["app/fonts/**.ttf"])
+    .pipe(ttf2woff())
+    .pipe(dest("app/fonts/"));
+    return src(["app/fonts/**.ttf"])
+    // .pipe(ttf2woff())
+    .pipe(ttf2woff2())
+    .pipe(dest("app/fonts/"));
+}
+
+// Конвертировать TTF шрифты 
+exports.fontsStyle = fontsStyle;
+exports.convertFonts = convertFonts;
+
+// Font Face для шрифта 
+const cb = () => {};
+let srcFonts = "app/scss/_fonts.scss";
+let appFonts = "app/fonts";
+
+function fontsStyle() {
+    let file_content = fs.readFileSync(srcFonts);
+    fs.writeFile(srcFonts, "", cb);
+    fs.readdir(appFonts, function (err, items) {
+        if(items) {
+            let c_fontname;
+            for (let i = 0; i < items.length; i++) {
+                let fontname = items[i].split(".");
+                fontname = fontname[0];
+                if (c_fontname != fontname) {
+                    fs.appendFile(
+						srcFonts, 
+						'@include font-face("' + 
+                        fontname + 
+                        '", "' + 
+                        fontname +
+                        '", 400);\r\n',
+                        cb
+                    );
+                }
+                c_fontname = fontname;
+            }
+        }
+    });
+}
 
 // создаем папки и файлы командой gulp struct
 // для запуска convertStyles, watchFiles, browserSync пишем gulp 
