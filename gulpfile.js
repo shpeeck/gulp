@@ -25,9 +25,9 @@ function browserSync() {
 
 function watchFiles() {
     watch('app/scss/**/*.scss', convertStyles);
-    // watch('app/*.html').on("change", sync.reload);
-    // watch('app/css/*.css').on("change", sync.reload);
-    // watch('app/js/*.js').on("change", sync.reload);
+    watch('app/*.html').on("change", sync.reload);
+    watch('app/css/*.css').on("change", sync.reload);
+    watch('app/js/*.js').on("change", sync.reload);
     // watch('app/_img', imagesCompressed);
     // watch('app/fonts/**.ttf', series(convertFonts, fontsStyle));
 }
@@ -37,3 +37,6 @@ exports.convertStyles = convertStyles;
 exports.watchFiles = watchFiles;
 exports.browserSync = browserSync;
 exports.default = parallel(convertStyles, watchFiles, browserSync);
+
+
+// для запуска convertStyles, watchFiles, browserSync пишем gulp 
