@@ -4,7 +4,8 @@ const scss = require("gulp-sass"),
 	sync = require("browser-sync").create(),
 	imagemin = require("gulp-imagemin"),
 	ttf2woff = require("gulp-ttf2woff"),
-    ttf2woff2 = require("gulp-ttf2woff2"),
+	ttf2woff2 = require("gulp-ttf2woff2"),
+	fi = require("gulp-file-include"),
 
 	fs = require("fs");
 
@@ -65,13 +66,26 @@ function browserSync() {
 	});
 }
 
+// file include
+const fileinclude = function () {
+	return src(["app/pages/**/*.html"])
+	.pipe(
+		fi({
+			prefix:'@@',
+			basepath: '@file'
+		})
+	)
+	.pipe(dest("app"));
+}
+
 function watchFiles() {
     watch('app/scss/**/*.scss', convertStyles);
     watch('app/*.html').on("change", sync.reload);
     watch('app/css/*.css').on("change", sync.reload);
     watch('app/js/*.js').on("change", sync.reload);
     watch('app/img', imagesCompressed);
-    watch('app/fonts/**.ttf', series(convertFonts, fontsStyle));
+	watch('app/fonts/**.ttf', series(convertFonts, fontsStyle));
+	watch('app/pages/**/*.html', fileinclude);
 }
 
 
@@ -81,7 +95,7 @@ exports.browserSync = browserSync;
 exports.imagesCompressed = imagesCompressed;
 exports.struct = createFiles;
 
-exports.default = parallel(convertStyles, browserSync, watchFiles, series(convertFonts, fontsStyle));
+exports.default = parallel(fileinclude, convertStyles, browserSync, watchFiles, series(convertFonts, fontsStyle));
 
 // build 
 function moveHtml() {
@@ -108,6 +122,7 @@ exports.moveHtml = moveHtml;
 exports.moveCss = moveCss;
 exports.moveJs = moveJs;
 exports.moveImgs = moveImgs;
+exports.fileinclude = fileinclude;
 exports.build = series(moveHtml, moveCss, moveJs, moveImgs)
 
 // Шрифты 
