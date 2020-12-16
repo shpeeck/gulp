@@ -21,7 +21,7 @@ function createFiles() {
             }
             console.log("File created");
         });
-        fs.writeFile("newfolder//scss/style.scss", "", function (err) {
+        fs.writeFile("newfolder/scss/style.scss", "", function (err) {
             if(err) {
                 throw err;
             }
@@ -68,7 +68,7 @@ function browserSync() {
 
 // file include
 const fileinclude = function () {
-	return src(["app/pages/**/*.html"])
+	return src(["app/pages/*.html"])
 	.pipe(
 		fi({
 			prefix:'@@',
@@ -80,7 +80,7 @@ const fileinclude = function () {
 
 function watchFiles() {
     watch('app/scss/**/*.scss', convertStyles);
-    watch('app/*.html').on("change", sync.reload);
+    watch('app//*.html', fileinclude).on("change", sync.reload);
     watch('app/css/*.css').on("change", sync.reload);
     watch('app/js/*.js').on("change", sync.reload);
     watch('app/img', imagesCompressed);
